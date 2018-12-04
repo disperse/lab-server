@@ -110,8 +110,8 @@ function processCard (card, playerIndex, game, workerIndex) {
           }
         break;
         case 'nosecone':
-          if (player.rocket[0] === 0) {
-            player.rocket[0] = 1
+          if (player.rocket[1] === 0) {
+            player.rocket[1] = 1
           }
         break;
         default:
