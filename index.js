@@ -101,10 +101,10 @@ function processCard (card, playerIndex, game, workerIndex) {
           }
         break;
         case 'wing':
-          if (player.rocket[5] === 0) {
-            player.rocket[5] = 1
-          } else if (player.rocket[6] === 0) {
+          if (player.rocket[6] === 0) {
             player.rocket[6] = 1
+          } else if (player.rocket[5] === 0) {
+            player.rocket[5] = 1
           } else {
             return;
           }
@@ -423,7 +423,7 @@ function initGame () {
   }
 
   let clonedActiveCards = JSON.parse(JSON.stringify(cards[0]))
-  let clonedUpcomingCards = JSON.parse(JSON.stringify(cards[0]))
+  let clonedUpcomingCards = JSON.parse(JSON.stringify(cards[1]))
   game.activeCards = game.activeCards.concat(clonedActiveCards)
   game.upcomingCards = game.upcomingCards.concat(clonedUpcomingCards)
   return game
