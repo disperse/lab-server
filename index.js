@@ -351,6 +351,38 @@ const cards = [
       },
       player: -1
     }
+  ],
+  [
+    {
+      name: 'Carbon fiber remnants',
+      gain: {
+        carbon: 1
+      },
+      upkeep: {
+        carbon: 1
+      },
+      player: -1
+    },
+    {
+      name: 'Aluminum scraps',
+      gain: {
+        aluminum: 2
+      },
+      upkeep: {
+        aluminum: 2
+      },
+      player: -1
+    },
+    {
+      name: 'Hostile takeover',
+      gain: {
+        cash: 3
+      },
+      upkeep: {
+        cash: 3
+      },
+      player: -1
+    }
   ]
 ]
 
