@@ -309,6 +309,18 @@ const cards = [
       player: -1
     },
     {
+      name: 'Hedge funds',
+      gain: {
+        cash: 1
+      },
+      upkeep: {
+        cash: 1
+      },
+      player: -1
+    },
+  ]
+  [ // Week 3
+    {
       name: 'Build booster',
       cost: {
         aluminum: 2,
@@ -319,16 +331,6 @@ const cards = [
         booster: 1
       },
       player: -1
-    }
-  ],
-  [ // Week 3
-    {
-      name: 'Launch rocket',
-      player: -1,
-      requires: [
-        '1 command module',
-        '1 booster'
-      ]
     },
     {
       name: 'Build delta wing',
@@ -354,14 +356,12 @@ const cards = [
   ],
   [
     {
-      name: 'Carbon fiber remnants',
-      gain: {
-        carbon: 1
-      },
-      upkeep: {
-        carbon: 1
-      },
-      player: -1
+      name: 'Launch rocket',
+      player: -1,
+      requires: [
+        '1 command module',
+        '1 booster'
+      ]
     },
     {
       name: 'Aluminum scraps',
