@@ -403,9 +403,9 @@ function initPlayer () {
   return player
 }
 
-const games = []
-const lookingForPlayers = [] // Players ones waiting for player twos
-const players = {}
+let games = []
+let lookingForPlayers = [] // Players ones waiting for player twos
+let players = {}
 
 express()
   .use(cors())
@@ -445,8 +445,9 @@ express()
         // No available games, player is player 1
         console.log('no available games, start new game')
         player.playerIndex = 0
-        let len = games.push(initGame())
-        player.gameIndex = (len - 1)
+        let game = initGame()
+        games.push(game)
+        player.gameIndex = (games.length - 1)
         lookingForPlayers.push(player)
       }
       let game = games[player.gameIndex]
