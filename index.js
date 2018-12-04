@@ -179,7 +179,8 @@ function endRound(game) {
   } else {
     game.round++
     if (cards.length > game.round) {
-      game.upcomingCards = game.upcomingCards.concat(cards[game.round])
+      let clonedCards = JSON.parse(JSON.stringify(cards[game.round]))
+      game.upcomingCards = game.upcomingCards.concat(clonedCards)
     }
     // Payday
     for (let p = 0; p < game.players.length; p++) {
@@ -421,8 +422,10 @@ function initGame () {
     upcomingCards: []
   }
 
-  game.activeCards = game.activeCards.concat(cards[0])
-  game.upcomingCards = game.upcomingCards.concat(cards[1])
+  let clonedActiveCards = JSON.parse(JSON.stringify(cards[0]))
+  let clonedUpcomingCards = JSON.parse(JSON.stringify(cards[0]))
+  game.activeCards = game.activeCards.concat(clonedActiveCards)
+  game.upcomingCards = game.upcomingCards.concat(clonedUpcomingCards)
   return game
 }
 
