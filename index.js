@@ -317,8 +317,8 @@ const cards = [
         cash: 1
       },
       player: -1
-    },
-  ]
+    }
+  ],
   [ // Week 3
     {
       name: 'Build booster',
