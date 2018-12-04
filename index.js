@@ -167,9 +167,9 @@ function endRound(game) {
       }
     }
     if (card.name === 'Junkyard') {
-      card.gain.aluminum += getRandomInt(2)
-      card.gain.carbon += getRandomInt(2)
-      card.gain.electronics += getRandomInt(2)
+      card.gain.aluminum += getRandomInt(3)
+      card.gain.carbon += getRandomInt(3)
+      card.gain.electronics += getRandomInt(3)
     }
   }
 
@@ -275,8 +275,8 @@ const cards = [
     {
       name: 'Build office',
       cost: {
-        aluminum: 5,
-        electronics: 2
+        aluminum: 4,
+        electronics: 1
       },
       gain: {
         office: 1
@@ -335,7 +335,7 @@ const cards = [
     {
       name: 'Build delta wing',
       cost: {
-        aluminum: 3,
+        aluminum: 2,
         carbon: 3
       },
       gain: {
