@@ -27,12 +27,12 @@ function processCard (card, playerIndex, game, workerIndex) {
   // Two players can't use the same space
   if (card.player > -1) return;
   let player = game.players[playerIndex]
+  let otherPlayer = game.players[(playerIndex === 0) ? 1 : 0]
   // Can't play out of turn
   if (! player.myTurn) return;
   if (card.name === 'First player') {
-    for (let p = 0; p < game.players.length; p++) {
-      game.players[p].firstPlayer = (!game.players[p].firstPlayer)
-    }
+    player.firstPlayer = true
+    otherPlayer.firstPlayer = false
   }
   if (card.name === 'Launch rocket') {
     if (player.rocket[0] === 0 || player.rocket[2] === 0) {
@@ -42,6 +42,7 @@ function processCard (card, playerIndex, game, workerIndex) {
     success += (player.rocket[1] + player.rocket[3] + player.rocket[4] + player.rocket[5] + player.rocket[6]) * 15
     if (getRandomInt(100) < success) {
       player.won = true
+      game.gameOver = true
     } else {
       for (let r = 0; r < player.rocket.length; r++) {
         player.rocket[r] = 0
@@ -51,8 +52,12 @@ function processCard (card, playerIndex, game, workerIndex) {
     }
   }
   if (card.hasOwnProperty('cost')) {
+    // First check if player has required resources
     for (key in card.cost) {
       if (player[key] < card.cost[key]) return;
+    }
+    // Then pay for it in full
+    for (key in card.cost) {
       player[key] -= card.cost[key]
     }
   }
@@ -63,7 +68,7 @@ function processCard (card, playerIndex, game, workerIndex) {
           let addedWorker = false
           for (let i = 0; i < player.workers.length; i++) {
             let office = player.workers[i]
-            if (office === 1) {
+            if (office === 1 && !addedWorker) {
               player.workers[i] = 3
               addedWorker = true
             }
@@ -73,10 +78,9 @@ function processCard (card, playerIndex, game, workerIndex) {
         case 'office':
           let addedOffice = false
           for (let i = 0; i < player.workers.length; i++) {
-            if (player.workers[i] === 0) {
+            if (player.workers[i] === 0 && !addedOffice) {
               player.workers[i] = 1
               addedOffice = true
-              break;
             }
           }
           if (!addedOffice) return;
@@ -125,18 +129,22 @@ function processCard (card, playerIndex, game, workerIndex) {
   card.player = playerIndex
   player.workers[workerIndex] = 3
 
+  let message = player.name + ' places a worker on the ' + card.name + ' card'
+  addMessage(game, message)
+
   // Does the other player have a free worker?
   let freeWorker = false
-  let otherPlayer = game.players.find((p) => p.myTurn === false)
-  console.log('otherPlayer.workers', otherPlayer.workers)
+  // console.log('otherPlayer.workers', otherPlayer.workers)
   for (let i = 0; i < otherPlayer.workers.length; i++) {
     if (otherPlayer.workers[i] === 2) {
       freeWorker = true
     }
   }
-  console.log('freeWorker', freeWorker)
+  // console.log('freeWorker', freeWorker)
   if (freeWorker) {
     // Switch turns
+    // let message = otherPlayer.name + '\'s turn.'
+    // addMessage(game, message)
     player.myTurn = false
     otherPlayer.myTurn = true
   } else {
@@ -158,6 +166,9 @@ function getRandomInt(max) {
 }
 
 function endRound(game) {
+  let message = 'End of turn'
+  addMessage(game, message)
+
   for (let c = 0; c < game.activeCards.length; c++) {
     let card = game.activeCards[c]
     card.player = -1
@@ -175,8 +186,14 @@ function endRound(game) {
 
   // Add new card
   if (game.upcomingCards.length > 0) {
-    game.activeCards.push(game.upcomingCards.pop())
+    let newCard = game.upcomingCards.pop()
+    game.activeCards.push(newCard)
+    message = 'Adding ' + newCard.name + ' card to the offer'
+    addMessage(game, message)
   } else {
+    message = 'Payday!'
+    addMessage(game, message)
+
     game.round++
     if (cards.length > game.round) {
       let clonedCards = JSON.parse(JSON.stringify(cards[game.round]))
@@ -184,17 +201,34 @@ function endRound(game) {
     }
     // Payday
     for (let p = 0; p < game.players.length; p++) {
+      let paid = 0
+      let fired = 0
       for (let w = 0; w < game.players[p].workers.length; w++) {
         if (game.players[p].workers[w] === 3) {
           if (game.players[p].cash > 1) {
             game.players[p].cash -= 2
+            paid += 2
           } else {
-            // worker gets 'fired'
-            game.players[p].workers[w] = 1
+            // Never fire the last worker
+            if (w > 0) {
+              // worker gets 'fired'
+              game.players[p].workers[w] = 1
+              fired++
+            }
           }
         }
       }
+      message = game.players[p].name + ' paid their workers ' + paid + ' cash.'
+      addMessage(game, message)
+
+      if (fired > 0) {
+        message = game.players[p].name + ' couldn\'t pay every worker\'s salary and fired ' + paid + ' worker(s).'
+        addMessage(game, message)
+      }
+
     }
+    message = 'Starting round ' + game.round
+    addMessage(game, message)
   }
 
   // First player gets to start the turn
@@ -387,11 +421,22 @@ const cards = [
   ]
 ]
 
+function addMessage (game, message) {
+  game.messages.unshift(message)
+  // Limit the message queue to the last 5 messages
+  if (game.messages.length > 10) {
+    game.messages.pop()
+  }
+}
+
 function initGame () {
   let game = {
+    gameOver: false,
+    messages: ['Game begins'],
     round: 1,
     players: [
       {
+        lastSeen: -1,
         won: false,
         firstPlayer: true,
         player: 0,
@@ -405,6 +450,7 @@ function initGame () {
         workers: [2, 2, 0, 0, 0, 0]
       },
       {
+        lastSeen: -1,
         won: false,
         firstPlayer: false,
         player: 1,
@@ -423,6 +469,15 @@ function initGame () {
   }
 
   let clonedActiveCards = JSON.parse(JSON.stringify(cards[0]))
+
+  // Junkyard should start with some resources
+  for (let i = 0; i < clonedActiveCards.length; i++) {
+    if (clonedActiveCards[i].name === 'Junkyard') {
+      clonedActiveCards[i].gain.aluminum += getRandomInt(3)
+      clonedActiveCards[i].gain.carbon += getRandomInt(3)
+      clonedActiveCards[i].gain.electronics += getRandomInt(3)
+    }
+  }
   let clonedUpcomingCards = JSON.parse(JSON.stringify(cards[1]))
   game.activeCards = game.activeCards.concat(clonedActiveCards)
   game.upcomingCards = game.upcomingCards.concat(clonedUpcomingCards)
@@ -454,6 +509,7 @@ express()
       let player = players[req.params.userId]
       player.lastSeen = Date.now()
       let game = games[player.gameIndex]
+      game.players[player.playerIndex].lastSeen = player.lastSeen
       game.youAre = player.playerIndex
       res.send(game)
     } else {
@@ -487,6 +543,7 @@ express()
       }
       let game = games[player.gameIndex]
       game.youAre = player.playerIndex
+      game.players[player.playerIndex].lastSeen = player.lastSeen
       res.send(game)
     }
    })
@@ -495,8 +552,13 @@ express()
   .post('/game/:userId', (req, res) => {
     if (players.hasOwnProperty(req.params.userId)) {
       let player = players[req.params.userId]
+      let now = Date.now()
+      player.lastSeen = now
       let game = games[player.gameIndex]
       let card = game.activeCards[req.body.cardIndex]
+      if (game.gameOver) {
+        return
+      }
       // console.log('req.body', req.body)
       // console.log('player', player.body)
       // console.log('game', game)
@@ -504,6 +566,7 @@ express()
       processCard (card, player.playerIndex, game, req.body.workerIndex)
       // games[req.params.userId].received = req.body
       game.youAre = player.playerIndex
+      game.players[player.playerIndex].lastSeen = player.lastSeen
       res.send(game)
     } else {
       res.send('No game with that ID found.')
